@@ -26,7 +26,7 @@
             console.log("Manufacturer: " + device.manufacturerName);
 
             await device.open(); // Begin a session.
-            await device.selectConfiguration(3); // Select configuration #1 for the device.
+            await device.selectConfiguration(1); // Select configuration #1 for the device.
             console.log(device);
             await device.claimInterface(0); // Request exclusive control over interface #2.
 
