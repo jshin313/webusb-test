@@ -19,22 +19,49 @@
             // Prompt user to choose device
             let device = await navigator.usb.requestDevice({ filters: [{ vendorId: 0x0451 }] });
 
-            console.log(device);
+            // console.log(device);
             // Product Name
             console.log("Product Name: " + device.productName);
             // Manufacturer Name
             console.log("Manufacturer: " + device.manufacturerName);
 
             await device.open(); // Begin a session.
-            await device.selectConfiguration(1); // Select configuration #1 for the device.
-            console.log(device);
-            await device.claimInterface(0); // Request exclusive control over interface #2.
 
+            var endpointIn = 0x1;
+            var endpointOut = 0x2;
+
+
+            // Select configuration #1 for the device, 
+            // since that appears to be the active configuration
+            await device.selectConfiguration(1); 
+
+            console.log(device);
+
+            // Request exclusive control over interface #0
+            await device.claimInterface(0); 
+
+            // DEBUG: Prints device config info
+            // console.log(device.configuration.interfaces[0].alternates[0].endpoints);
+            // console.log(endpointOut);
+
+            // create a TypedArray with a size in bytes
+            const data = new Uint8Array(9);
+
+            data[3] = 0x04;
+            data[4] = 0x01;
+            data[7] = 0x04;
+
+
+            console.log("Bulk out: " + data);
+            device.transferOut(endpointOut, data);
 
             // Ready to receive data
-            // let result = device.transferIn(5, 64); // Waiting for 64 bytes of data from endpoint #5.
-            // let decoder = new TextDecoder();
-            // document.getElementById('target').innerHTML = 'Received: ' + decoder.decode(result.data);
+            device.transferIn(endpointIn, 9).then(result => {
+			    var arrayBuffer = result.data.buffer;
+                var uint8View = new Uint8Array(arrayBuffer);
+                console.log(uint8View);
+                
+            })
 
         } catch (error) {
             document.getElementById('target').innerHTML = error;
